@@ -1,7 +1,7 @@
 #  Copyright (c) 2026 Forum Software, Inc. (YHat Labs). Licensed under the Apache License, Version 2.0.
 """Model files: a local folder, or a Hugging Face repository downloaded once into the Hugging Face cache.
 
-A released model is a folder with `config.json` (its task, architecture, network settings, licence and inference
+A released model is a folder with `config.json` (its task, architecture, network settings, license and inference
 defaults) and its weights: `model.safetensors`, or shards listed in `model.safetensors.index.json` for large models.
 `config.json` may also carry `files` (any other files the model needs, e.g. a tabular model's preprocessor), `sha256`
 (file name -> digest), checked when the model loads, and `requires_yhatmodels`, the oldest yhatmodels that can run it.
@@ -23,8 +23,8 @@ DOWNLOAD = [CONFIG, "model*.safetensors", INDEX, "LICENSE*", "NOTICE*"]
 
 def resolve(model: str | Path, revision: str | None = None, token: str | None = None) -> Path:
     """A local folder as it is; otherwise a released model's short name or a Hugging Face repo id: the copy already in
-    the Hugging Face cache (no network: downloaded before means accepted before), else downloaded after its licence has
-    been accepted when the licence asks for that (yhatmodels.licensing). Returns the folder."""
+    the Hugging Face cache (no network: downloaded before means accepted before), else downloaded after its license has
+    been accepted when the license asks for that (yhatmodels.licensing). Returns the folder."""
     path = Path(model).expanduser()
     if path.is_dir():
         if not (path / CONFIG).exists() or not ((path / WEIGHTS).exists() or (path / INDEX).exists()):
@@ -33,16 +33,27 @@ def resolve(model: str | Path, revision: str | None = None, token: str | None = 
         _check_files(path)
         return path
     from huggingface_hub import snapshot_download
+    from huggingface_hub.utils import HFValidationError, RepositoryNotFoundError
 
+    from yhatmodels.catalog import MODELS
+
+    what = (f"A model is a released model's name ({', '.join(MODELS)}; yhatmodels.list_models()), a Hugging Face repository "
+            "id ('owner/name') or a folder with config.json and the weights.")  # fmt: skip
     entry = lookup(str(model))
-    repo = entry["repo"] if entry else str(model)
+    name = str(model)
+    if not entry and (name.startswith((".", "/", "~", "\\")) or name.count("/") > 1 or "\\" in name):
+        raise ModelLoadError(f"{name}: no such folder. {what}")
+    repo = entry["repo"] if entry else name
     if (cached := _cached(repo, revision)) is not None:
         return cached
     if entry:
         ensure_accepted(repo, entry["license"])  # known without a network call
-    head = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[CONFIG]))
+    try:
+        head = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[CONFIG]))
+    except (RepositoryNotFoundError, HFValidationError):
+        raise ModelLoadError(f"{name} is not a model yhatmodels can find (no such repository, or a private one). {what}") from None
     config = read_config(head)
-    if not entry:  # another repository: its config.json names the licence
+    if not entry:  # another repository: its config.json names the license
         ensure_accepted(repo, config.get("license"))
     folder = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[*DOWNLOAD, *config.get("files", [])]))
     _check_files(folder)
@@ -55,7 +66,7 @@ def _cached(repo: str, revision: str | None) -> Path | None:
 
     try:  # only the files we download: newer huggingface_hub calls a snapshot without the card or .gitattributes incomplete
         folder = Path(snapshot_download(repo, revision=revision, local_files_only=True, allow_patterns=DOWNLOAD))
-    except OSError:  # LocalEntryNotFoundError, IncompleteSnapshotError: not (fully) downloaded yet
+    except (OSError, ValueError):  # LocalEntryNotFoundError, IncompleteSnapshotError: not (fully) downloaded; a bad id
         return None
     if not (folder / CONFIG).exists():
         return None

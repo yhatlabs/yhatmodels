@@ -1,9 +1,9 @@
 #  Copyright (c) 2026 Forum Software, Inc. (YHat Labs). Licensed under the Apache License, Version 2.0.
-"""The one-time licence acceptance for YHat Labs' open models, tied to a yhatlabs.com account.
+"""The one-time license acceptance for YHat Labs' open models, tied to a yhatlabs.com account.
 
 Before the first download of such a model, yhatmodels checks with the YHat Labs API that the person behind a token has
-accepted the model's licence. With no token, or one whose account has not accepted it yet, it opens yhatlabs.com in the
-browser (sign in or create an account, accept the licence) and receives the token back on a one-off local address; the
+accepted the model's license. With no token, or one whose account has not accepted it yet, it opens yhatlabs.com in the
+browser (sign in or create an account, accept the license) and receives the token back on a one-off local address; the
 token can also be pasted. It is then kept in ~/.cache/yhatmodels/token. Weights already downloaded are never checked, so
 they work offline.
 
@@ -30,7 +30,7 @@ from yhatmodels.errors import LicenseNotAcceptedError
 
 TOKEN_ENV, KEY_ENV, NO_BROWSER_ENV = "YHAT_MODELS_TOKEN", "YHAT_API_KEY", "YHATMODELS_NO_BROWSER"
 WAIT_S = 600  # how long the terminal waits for the browser before giving up
-_accepted: set[str] = set()  # licences confirmed in this process
+_accepted: set[str] = set()  # licenses confirmed in this process
 
 
 def api_url() -> str:
@@ -91,7 +91,7 @@ def _in_notebook() -> bool:
 
 
 def _callback_server(state: str, done_url: str) -> tuple[http.server.HTTPServer, threading.Event, list[str]]:
-    """A one-off server on 127.0.0.1 that takes the token the licence page sends back. `state` ties the answer to this
+    """A one-off server on 127.0.0.1 that takes the token the license page sends back. `state` ties the answer to this
     request, so another page cannot plant a token."""
     got, event = [], threading.Event()
 
@@ -173,7 +173,7 @@ def obtain_token(license_id: str, model: str, intro: str) -> str | None:
 
 
 def ensure_license(model: str, license_id: str) -> None:
-    """Make sure the person running this has accepted `license_id` (the licence of `model`), asking them once if not."""
+    """Make sure the person running this has accepted `license_id` (the license of `model`), asking them once if not."""
     if license_id in _accepted:
         return
     page = license_page(license_id, model)
@@ -184,12 +184,12 @@ def ensure_license(model: str, license_id: str) -> None:
         return
     if status == "unreachable":
         raise LicenseNotAcceptedError(
-            f"Could not reach {api_url()} to check the licence of {model} before its first download. Check the "
+            f"Could not reach {api_url()} to check the license of {model} before its first download. Check the "
             "connection and try again; once downloaded, the model works offline."
         )
     if status == "invalid" and token and source == "file":
         token_file().unlink(missing_ok=True)  # replaced on the website, or from another deployment
-    intro = (f"{model} is free for research, personal use, internal evaluation and competitions under its licence. It "
+    intro = (f"{model} is free for research, personal use, internal evaluation and competitions under its license. It "
              "needs a one-time acceptance with a yhatlabs.com account before the first download; your data stays on "
              "this machine.")  # fmt: skip
     new = obtain_token(license_id, model, intro)
@@ -197,16 +197,16 @@ def ensure_license(model: str, license_id: str) -> None:
         why = {"not_accepted": "The account of this token has not accepted it yet.",
                "invalid": "The token is no longer valid." if token else "No token found."}[status]  # fmt: skip
         raise LicenseNotAcceptedError(
-            f"{model} needs a one-time licence acceptance with a yhatlabs.com account before its first download. {why}\n"
-            f"  1. Open {page} (sign in or create an account) and accept the licence.\n"
+            f"{model} needs a one-time license acceptance with a yhatlabs.com account before its first download. {why}\n"
+            f"  1. Open {page} (sign in or create an account) and accept the license.\n"
             f"  2. Copy the token the page shows and set it: export {TOKEN_ENV}=<token>\n"
             f"     (or run `yhatmodels accept-license {model}` in a terminal, which does both)."
         )
     status = check(new, license_id)
     if status != "accepted":
-        why = {"invalid": "is not valid", "not_accepted": "belongs to an account that has not accepted the licence",
+        why = {"invalid": "is not valid", "not_accepted": "belongs to an account that has not accepted the license",
                "unreachable": "could not be checked"}[status]  # fmt: skip
-        raise LicenseNotAcceptedError(f"That token {why}. Accept the licence at {page}, then copy the token it shows.")
+        raise LicenseNotAcceptedError(f"That token {why}. Accept the license at {page}, then copy the token it shows.")
     saved = save_token(new)
     _accepted.add(license_id)
-    print(f"Licence accepted. Token saved to {saved}; {model} will download now.")
+    print(f"License accepted. Token saved to {saved}; {model} will download now.")

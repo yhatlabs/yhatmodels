@@ -6,7 +6,7 @@ class YHatModelsError(Exception):
 
 
 class LicenseNotAcceptedError(YHatModelsError):
-    """The model's licence has not been accepted yet (see yhatmodels.accept_license)."""
+    """The model's license has not been accepted yet (see yhatmodels.accept_license)."""
 
 
 class ModelLoadError(YHatModelsError):

@@ -85,9 +85,9 @@ def _parser() -> argparse.ArgumentParser:
     t.add_argument("--season", type=int), t.add_argument("--min-gain", type=float, default=0.02)
     t.add_argument("-o", "--output", required=True, help="folder for the tuned model (load it with --model FOLDER)")
     _cols(t), _model_opts(t)
-    sub.add_parser("models", help="the released models, their tasks and licences")
+    sub.add_parser("models", help="the released models, their tasks and licenses")
     a = sub.add_parser(
-        "accept-license", help="accept a model's licence before its first download (YHat Labs models: with a yhatlabs.com account)"
+        "accept-license", help="accept a model's license before its first download (YHat Labs models: with a yhatlabs.com account)"
     )
     a.add_argument("model")
     return ap
@@ -95,6 +95,16 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    from yhatmodels.errors import YHatModelsError
+
+    try:
+        return _run(args)
+    except (YHatModelsError, ValueError, TypeError, OSError) as e:  # a mistake in the input or setup: the message, not a traceback
+        print(f"yhatmodels: error: {e}", file=sys.stderr)
+        return 1
+
+
+def _run(args) -> int:
     import yhatmodels
 
     if args.cmd == "models":
@@ -103,7 +113,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "accept-license":
         where = yhatmodels.accept_license(args.model)
-        print("licence accepted" + (f"; recorded in {where}" if where else ""))
+        print("license accepted" + (f"; recorded in {where}" if where else ""))
         return 0
     data = _read(args.data)
     model = yhatmodels.ChakraTS.from_pretrained(args.model, device=args.device)
@@ -116,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
         future = _read(args.future) if args.future else None
         fc = model.forecast(data, args.h, quantiles=quantiles, level=_list(args.level, float), future=future, **common)
         _write(fc, args.output)
+        if args.output:
+            print(f"wrote {len(fc)} rows to {args.output}", file=sys.stderr)
         return 0
     if args.cmd == "evaluate":
         kw = {"metrics": _list(args.metrics)} if args.metrics else {}

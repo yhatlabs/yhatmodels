@@ -1,13 +1,13 @@
 #  Copyright (c) 2026 Forum Software, Inc. (YHat Labs). Licensed under the Apache License, Version 2.0.
-"""Model licence acceptance.
+"""Model license acceptance.
 
-The `yhatmodels` code is Apache-2.0. Model weights are released under their own licence (named in each model's
-`config.json` and model card). Weights under an open licence (Apache-2.0, MIT, BSD) download as they are. YHat Labs'
-models under another licence (ChakraTS-OS-10M) are accepted once per person with a yhatlabs.com account before the first
-download (yhatmodels.account: the browser opens, or a token in YHAT_MODELS_TOKEN). Other repositories' non-open licences
+The `yhatmodels` code is Apache-2.0. Model weights are released under their own license (named in each model's
+`config.json` and model card). Weights under an open license (Apache-2.0, MIT, BSD) download as they are. YHat Labs'
+models under another license (ChakraTS-OS-10M) are accepted once per person with a yhatlabs.com account before the first
+download (yhatmodels.account: the browser opens, or a token in YHAT_MODELS_TOKEN). Other repositories' non-open licenses
 are accepted once per model on this machine: `yhatmodels.accept_license("<repo>")`, or YHATMODELS_ACCEPT_LICENSE=1 (e.g.
-in CI) after reading the licence, stored under ~/.cache/yhatmodels/licenses. Weights loaded from a local folder or
-already downloaded are not checked: whoever put them there has already obtained them under their licence.
+in CI) after reading the license, stored under ~/.cache/yhatmodels/licenses. Weights loaded from a local folder or
+already downloaded are not checked: whoever put them there has already obtained them under their license.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ OPEN_LICENSES = {"apache-2.0", "mit", "bsd-2-clause", "bsd-3-clause"}  # SPDX id
 
 
 def needs_acceptance(license_id: str | None) -> bool:
-    """Whether weights under this licence need acceptance before download (a missing or unknown licence does)."""
+    """Whether weights under this license need acceptance before download (a missing or unknown license does)."""
     return (license_id or "").strip().lower() not in OPEN_LICENSES
 
 
@@ -43,9 +43,9 @@ def license_url(model_id: str) -> str:
 
 
 def accept_license(model_id: str) -> Path | None:
-    """Accept the licence of `model_id` ahead of its first download. A YHat Labs model ("ChakraTS-OS-10M"): the one-time
+    """Accept the license of `model_id` ahead of its first download. A YHat Labs model ("ChakraTS-OS-10M"): the one-time
     acceptance with a yhatlabs.com account (opens the browser); returns the saved token's file, or None when the token
-    comes from the environment. Another repository: records here that you have read and accept its licence; returns
+    comes from the environment. Another repository: records here that you have read and accept its license; returns
     the file the acceptance is stored in."""
     entry = lookup(model_id)
     if entry and needs_acceptance(entry["license"]):
@@ -74,6 +74,6 @@ def ensure_accepted(model_id: str, license_id: str | None = None) -> None:
         return
     if not is_accepted(model_id):
         raise LicenseNotAcceptedError(
-            f"{model_id} is released under its own licence ({license_url(model_id)}). Read it, then accept it once with "
+            f"{model_id} is released under its own license ({license_url(model_id)}). Read it, then accept it once with "
             f'yhatmodels.accept_license("{model_id}") or set {ENV}=1.'
         )

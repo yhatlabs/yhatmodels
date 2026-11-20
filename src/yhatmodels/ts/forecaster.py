@@ -44,16 +44,31 @@ GROUP_ROWS = 768  # rows per forward pass when series have several rows (an R x 
 BUDGET_STEPS = 8192  # the row budgets hold for histories up to this long; a longer one fills a pass with proportionally fewer rows
 
 
-def _default_device() -> str:
-    if torch.cuda.is_available():
-        return "cuda"
+def _mps_available() -> bool:
     mps = getattr(torch.backends, "mps", None)
-    return "mps" if mps is not None and mps.is_available() else "cpu"
+    return mps is not None and mps.is_available()
+
+
+def _default_device() -> str:
+    return "cuda" if torch.cuda.is_available() else "mps" if _mps_available() else "cpu"
+
+
+def _check_device(device: str) -> str:
+    """A device the user named, refused up front if this machine can't run it (rather than at the first forecast)."""
+    try:
+        kind = torch.device(device).type
+    except (RuntimeError, ValueError):
+        raise ValueError(f"device={device!r} is not a device; use 'cuda' (NVIDIA GPU), 'mps' (Apple GPU) or 'cpu'") from None
+    if kind == "cuda" and not torch.cuda.is_available():
+        raise ValueError(f"device={device!r} but PyTorch finds no NVIDIA GPU here; use device='{_default_device()}', or leave device out")
+    if kind == "mps" and not _mps_available():
+        raise ValueError(f"device={device!r} but PyTorch finds no Apple GPU here; use device='{_default_device()}', or leave device out")
+    return device
 
 
 class ChakraTS:
     def __init__(self, net: ChakraTSNet, config: dict, device: str | None = None) -> None:
-        self.net, self.config, self.device = net, config, device or _default_device()
+        self.net, self.config, self.device = net, config, _check_device(device) if device else _default_device()
         inference = config.get("inference", {})
         self.max_context = int(inference.get("max_context", 8192))
         self.presets = {**DEFAULT_PRESETS, **inference.get("presets", {})}  # a model's config.json may add some
@@ -65,7 +80,7 @@ class ChakraTS:
     def from_pretrained(cls, model: str | Path = "ChakraTS-OS-10M", device: str | None = None, revision: str | None = None,
                         token: str | None = None) -> ChakraTS:  # fmt: skip
         """A released model's short name (see yhatmodels.list_models()), a Hugging Face repo id, or a local folder
-        (config.json + weights). Weights under a non-open licence need it accepted before the first download: once per
+        (config.json + weights). Weights under a non-open license need it accepted before the first download: once per
         person with a yhatlabs.com account for YHat Labs' models (the browser opens; YHAT_MODELS_TOKEN in CI), else
         with yhatmodels.accept_license."""
         loaded = load(model, "forecasting", revision, token)
@@ -75,7 +90,7 @@ class ChakraTS:
 
     @property
     def info(self) -> dict:
-        """What the model is and reads, for a model list: name, licence, parameters, longest history, patch sizes,
+        """What the model is and reads, for a model list: name, license, parameters, longest history, patch sizes,
         native quantile levels, presets, plus config.json's own `info` (inputs it supports, training data, ...)."""
         cfg = self.net.cfg
         return {
@@ -242,7 +257,7 @@ class ChakraTS:
         series held out to check the tune against the pretrained model through forecast() itself. Returns a new model
         (this one is unchanged) with the adapters merged into its weights; `.report` says how the tune did. When the
         tune does not beat the pretrained model by `min_gain` on the holdout, the pretrained model comes back (with a
-        warning). A tuned model is a Derivative under the model's licence; save() writes the licence and NOTICE with it.
+        warning). A tuned model is a Derivative under the model's license; save() writes the license and NOTICE with it.
 
         data / past / known / id_col / time_col / target_col / freq: as for evaluate(): the history, with known covariates
             over it. h: the horizon you will forecast (the holdout length). steps: training steps (batch of 8 windows).
@@ -257,8 +272,8 @@ class ChakraTS:
 
     def save(self, folder: str | Path) -> Path:
         """Write the model as a released-model folder (config.json with the weights' sha256, model.safetensors, and the
-        licence files it came with), loadable with ChakraTS.from_pretrained(folder). A tuned model's NOTICE states that
-        it was modified from its base model, as the licence asks of a Derivative."""
+        license files it came with), loadable with ChakraTS.from_pretrained(folder). A tuned model's NOTICE states that
+        it was modified from its base model, as the license asks of a Derivative."""
         import hashlib
         import json
         import shutil

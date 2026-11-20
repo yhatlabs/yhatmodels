@@ -19,14 +19,14 @@
   `EvaluationResult.plot_calibration()`.
 - Models: `yhatmodels.list_models()`; architectures registered per task; strict model settings (a model made for a newer
   yhatmodels asks for an upgrade); sha256-checked and sharded weights.
-- Model licences: YHat Labs' models under a non-open licence (ChakraTS-OS-10M) are accepted once per person with a
+- Model licenses: YHat Labs' models under a non-open license (ChakraTS-OS-10M) are accepted once per person with a
   yhatlabs.com account before the first download (the browser opens and hands a token back; pasted over SSH;
   `YHAT_MODELS_TOKEN` or an API key in CI); weights already downloaded are never checked. Other repositories under a
-  non-open licence are accepted once on the machine with `yhatmodels.accept_license()`.
+  non-open license are accepted once on the machine with `yhatmodels.accept_license()`.
 - `evaluate()`: rolling-origin backtests with the SDK's windows, metrics (mase, sql, wql, mae, rmse, coverage@w),
   baselines (seasonal_naive, naive), skill scores, calibration and `compare=` for your own forecasts.
 - `tune()`: fine-tuning on your own series (LoRA on every linear layer, holdout-checked against the pretrained model,
-  merged into a copy of the weights), `report`, and `save()` to a loadable folder with the licence files.
+  merged into a copy of the weights), `report`, and `save()` to a loadable folder with the license files.
 - The `yhatmodels` command line: `forecast`, `evaluate`, `tune`, `models`, `accept-license`.
 - pandas is a dependency (DataFrames, backtests and the command line work on a plain install); `[plot]` adds matplotlib.
 - A list of series gives each forecast in its series' own shape: `(h, Q)` for `(T,)`, `(V, h, Q)` for `(V, T)`.
