@@ -1,0 +1,8 @@
+yhatmodels
+Copyright (c) 2026 Forum Software, Inc. (YHat Labs)
+
+The yhatmodels source code is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Model weights loaded by yhatmodels are not part of this repository and are released under their own licences, named in
+each model's config.json and model card (for example, ChakraTS-OS-10M is released under the Chakra Non-Commercial
+Model License). Using yhatmodels does not grant any rights to a model's weights.

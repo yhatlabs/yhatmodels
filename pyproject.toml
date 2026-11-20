@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "yhatmodels"
+dynamic = ["version"]
+description = "YHatModels: open models from YHat Labs, run locally (time-series forecasting with ChakraTS first)"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "YHat Labs" }]
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.4",
+  "numpy>=1.24",
+  "safetensors>=0.4",
+  "huggingface_hub>=0.23",
+  "pandas>=2.0",
+]
+keywords = ["time series", "forecasting", "foundation model", "probabilistic forecasting"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.7"]
+dev = ["pytest>=8", "matplotlib>=3.7", "ruff>=0.6"]
+
+[project.scripts]
+yhatmodels = "yhatmodels.cli:main"
+
+[project.urls]
+Homepage = "https://yhatlabs.com"
+Repository = "https://github.com/yhatlabs/yhatmodels"
+
+[tool.hatch.version]
+path = "src/yhatmodels/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/yhatmodels"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
