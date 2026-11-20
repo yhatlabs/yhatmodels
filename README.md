@@ -1,20 +1,26 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/yhatlabs/.github/main/profile/logos/logo-on-dark.png">
-    <img alt="YHat Labs" src="https://raw.githubusercontent.com/yhatlabs/.github/main/profile/logos/logo-on-light.png" width="240">
-  </picture>
-</p>
-
 <h1 align="center">yhatmodels</h1>
 
 <p align="center">Open foundation models from YHat Labs that run on your own computer.</p>
 
 <p align="center">
-  <a href="https://pypi.org/project/yhatmodels/"><img src="https://img.shields.io/pypi/v/yhatmodels?color=8a5a2b" alt="PyPI"></a>
-  <a href="https://pypi.org/project/yhatmodels/"><img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-8a5a2b" alt="Python 3.10 to 3.13"></a>
-  <a href="https://huggingface.co/yhatlabs/ChakraTS-OS-10M"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-ChakraTS--OS--10M-FFD21E" alt="ChakraTS-OS-10M on Hugging Face"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/code-Apache--2.0-8a5a2b" alt="Code: Apache-2.0"></a>
+  <a href="#quick-start"><b>Install</b></a> ·
+  <a href="#what-you-can-do">What you can do</a> ·
+  <a href="#results">Results</a> ·
+  <a href="docs/usage.md">Usage guide</a> ·
+  <a href="https://huggingface.co/yhatlabs/ChakraTS-OS-10M">Model card</a>
 </p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/forecast_dark.png">
+    <img src="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/forecast_light.png" alt="ChakraTS-OS-10M forecasting a week of hourly electricity demand on the Texas Gulf Coast, next to what happened" width="100%">
+  </picture>
+  <br>
+  <sub>A week of hourly electricity demand on the Texas Gulf Coast, forecast from two weeks of history, with no training.
+  Data: <a href="https://www.ercot.com">ERCOT</a>.</sub>
+</p>
+
+> Forecasting in production? Use ChakraTS, our flagship model, through the [YHat Labs API](https://yhatlabs.com).
 
 yhatmodels is the Python library and command line to run YHat Labs' open foundation models for time-series forecasting
 and tabular prediction. A foundation model is pretrained on synthetic and real data, so it works on your data
@@ -29,16 +35,6 @@ a laptop CPU in a fraction of a second.
 
 For its size it is a frontier model: the most accurate open forecasting model under 100M parameters on fev-bench, and
 more accurate than most open models up to 100 times its size (see [Results](#results)).
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/forecast_dark.png">
-    <img src="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/forecast_light.png" alt="ChakraTS-OS-10M forecasting a week of hourly electricity demand on the Texas Gulf Coast, next to what happened" width="100%">
-  </picture>
-  <br>
-  <sub>A week of hourly electricity demand on the Texas Gulf Coast, forecast from two weeks of history, with no training.
-  Data: <a href="https://www.ercot.com">ERCOT</a>.</sub>
-</p>
 
 ## Quick start
 
