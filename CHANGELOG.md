@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.1 (unreleased)
+
+- README: every link and picture is a full URL, so the PyPI page works like the GitHub one (a test checks it).
+
+## 0.1.0 (2026-11-20)
 
 - First release: `ChakraTS` for time-series forecasting with ChakraTS-OS-10M.
 - `forecast(data, h, ...)` with the YHat Labs SDK's arguments: arrays in, arrays out (univariate, multivariate, past and

@@ -3,10 +3,10 @@
 <p align="center">Open foundation models from YHat Labs that run on your own computer.</p>
 
 <p align="center">
-  <a href="#quick-start"><b>Install</b></a> ·
-  <a href="#what-you-can-do">What you can do</a> ·
-  <a href="#results">Results</a> ·
-  <a href="docs/usage.md">Usage guide</a> ·
+  <a href="https://github.com/yhatlabs/yhatmodels#quick-start"><b>Install</b></a> ·
+  <a href="https://github.com/yhatlabs/yhatmodels#what-you-can-do">What you can do</a> ·
+  <a href="https://github.com/yhatlabs/yhatmodels#results">Results</a> ·
+  <a href="https://github.com/yhatlabs/yhatmodels/blob/main/docs/usage.md">Usage guide</a> ·
   <a href="https://huggingface.co/yhatlabs/ChakraTS-OS-10M">Model card</a>
 </p>
 
@@ -34,7 +34,7 @@ It is a drop-in alternative to ARIMA, Prophet or a model you would train yoursel
 a laptop CPU in a fraction of a second.
 
 For its size it is a frontier model: the most accurate open forecasting model under 100M parameters on fev-bench, and
-more accurate than most open models up to 100 times its size (see [Results](#results)).
+more accurate than most open models up to 100 times its size (see [Results](https://github.com/yhatlabs/yhatmodels#results)).
 
 ## Quick start
 
@@ -53,7 +53,7 @@ q = model.forecast(history, h=48)                         # the next 48 steps: q
 ```
 
 The first download asks you to accept the model license once, with a free yhatlabs.com account (see
-[License](#license)). After that the model runs entirely on your computer.
+[License](https://github.com/yhatlabs/yhatmodels#license)). After that the model runs entirely on your computer.
 
 ## What you can do
 
@@ -150,7 +150,7 @@ yhatmodels forecast sales.csv --h 7 --known price,promo --level 80,95 -o forecas
 yhatmodels evaluate sales.csv --h 7 --windows 3
 ```
 
-Every option is in the [usage guide](docs/usage.md).
+Every option is in the [usage guide](https://github.com/yhatlabs/yhatmodels/blob/main/docs/usage.md).
 
 ## Results
 
@@ -183,7 +183,7 @@ models lose some:
 
 <sub>fev-bench skill score (%), as of November 2026, computed the way the fev-bench leaderboard does from the result
 files in the [fev repository](https://github.com/autogluon/fev); sizes from the models' Hugging Face pages. The data
-behind the chart and table is in [docs/benchmarks.csv](docs/benchmarks.csv).</sub>
+behind the chart and table is in [docs/benchmarks.csv](https://github.com/yhatlabs/yhatmodels/blob/main/docs/benchmarks.csv).</sub>
 
 ## Ways to use ChakraTS
 
@@ -204,7 +204,7 @@ Both use the same argument names, so code moves from one to the other with few c
 
 ## License
 
-The `yhatmodels` code is [Apache-2.0](LICENSE). The ChakraTS-OS-10M weights are under the
+The `yhatmodels` code is [Apache-2.0](https://github.com/yhatlabs/yhatmodels/blob/main/LICENSE). The ChakraTS-OS-10M weights are under the
 [Chakra Non-Commercial Model License](https://yhatlabs.com/model-license): free for research, personal use, internal
 evaluation and data science competitions. For commercial use, use the [hosted API](https://yhatlabs.com) or write to
 [licensing@yhatlabs.com](mailto:licensing@yhatlabs.com).
