@@ -166,19 +166,21 @@ ChakraTS-OS-10M is the most accurate open model under 100M parameters, and more 
   </picture>
 </p>
 
-It is at its best when you give it covariates. On the 42 tasks that come with them, it keeps its accuracy, while most
-models lose some:
+It handles covariates well: on the 42 tasks that come with them, it keeps its accuracy, while most models lose
+some:
 
 | Model | Parameters | All 100 tasks | 42 tasks with covariates |
 |---|---|---|---|
+| ci-proto | 167M | 51.5 | 53.0 |
+| TimeH2O-v1 | 109M | 50.8 | 51.4 |
+| Timestral-209M | 209M | 50.4 | 50.7 |
 | **ChakraTS-OS-10M** | **10.6M** | **49.9** | **50.1** |
+| t0-gamma | 256M | 49.4 | 49.3 |
+| TimesFM-3 | 331M | 49.0 | 49.0 |
+| Simons-297M | 297M | 48.4 | 47.3 |
+| Chronos-2 | 119M | 47.3 | 47.0 |
 | Timestral-5M | 5.2M | 46.2 | 44.5 |
 | TimeH2O-v1-tiny | 5.8M | 45.5 | 41.5 |
-| Timestral-28M | 28M | 48.4 | 47.7 |
-| Chronos-2 | 119M | 47.3 | 47.0 |
-| t0-gamma | 256M | 49.4 | 49.3 |
-| Simons-297M | 297M | 48.4 | 47.3 |
-| TimesFM-3 | 331M | 49.0 | 49.0 |
 | Toto-2.0-2.5B | 2.5B | 44.4 | 38.8 |
 
 <sub>fev-bench skill score (%), as of November 2026, computed the way the fev-bench leaderboard does from the result
