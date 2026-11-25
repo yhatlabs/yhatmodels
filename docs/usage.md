@@ -14,8 +14,9 @@ q = model.forecast(data, h=24)
 - **One series:** a numpy array, a torch tensor, a pandas Series or a list of numbers. NaN marks missing values.
 - **Several series:** an array `(N, T)`, or a list of series of different lengths. Each forecast comes back in its
   series' shape.
-- **Several targets:** a series given as `(V, T)` forecasts its V targets jointly and gives `(V, h, Q)`; an array
-  `(N, V, T)` is N such series and gives `(N, V, h, Q)`.
+- **Several targets:** to forecast a series' V targets jointly, give it as a `(V, T)` array inside a list (`[y]` gives
+  `[(V, h, Q)]`), or stack N such series as `(N, V, T)`, which gives `(N, V, h, Q)`. A bare `(V, T)` array is V separate
+  series.
 - **Covariates:** per series, `past={"name": values}` (known up to the forecast origin, length T) and
   `known={"name": values}` (known over the history and the next h steps, length T + h); for several series, a list with
   one dict per series. Text values are treated as categories.
