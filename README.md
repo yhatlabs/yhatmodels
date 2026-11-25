@@ -3,11 +3,11 @@
 <p align="center">Open foundation models from YHat Labs that run on your own computer.</p>
 
 <p align="center">
-  <a href="https://github.com/yhatlabs/yhatmodels#quick-start"><b>Install</b></a> ·
-  <a href="https://github.com/yhatlabs/yhatmodels#what-you-can-do">What you can do</a> ·
-  <a href="https://github.com/yhatlabs/yhatmodels#results">Results</a> ·
-  <a href="https://github.com/yhatlabs/yhatmodels/blob/main/docs/usage.md">Usage guide</a> ·
-  <a href="https://huggingface.co/yhatlabs/ChakraTS-OS-10M">Model card</a>
+  <a href="https://pypi.org/project/yhatmodels/"><img alt="PyPI" src="https://img.shields.io/pypi/v/yhatmodels?color=6b5e4b"></a>
+  <a href="https://pepy.tech/projects/yhatmodels"><img alt="Downloads" src="https://img.shields.io/pepy/dt/yhatmodels?label=downloads&color=6b5e4b"></a>
+  <a href="https://pypi.org/project/yhatmodels/"><img alt="Python 3.10 to 3.13" src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-6b5e4b"></a>
+  <a href="https://huggingface.co/yhatlabs/ChakraTS-OS-10M"><img alt="Model on Hugging Face" src="https://img.shields.io/badge/%F0%9F%A4%97%20model-ChakraTS--OS--10M-FFD21E"></a>
+  <a href="https://colab.research.google.com/github/yhatlabs/yhatlabs-cookbook/blob/main/getting-started/chakrats-os-10m.ipynb"><img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </p>
 
 <p align="center">
@@ -20,21 +20,13 @@
   Data: <a href="https://www.ercot.com">ERCOT</a>.</sub>
 </p>
 
-> Forecasting in production? Use ChakraTS, our flagship model, through the [YHat Labs API](https://yhatlabs.com).
+**ChakraTS-OS-10M**, our first open model, forecasts any time series from its history, with a range of likely values
+around every step and no training on your data. It uses what you know about the future, reads up to 32,768 past values,
+and with 10.6M parameters runs on a laptop CPU. It is the most accurate open forecasting model under 100M parameters on
+fev-bench (see [Results](https://github.com/yhatlabs/yhatmodels#results)).
 
-yhatmodels is the Python library and command line to run YHat Labs' open foundation models for time-series forecasting
-and tabular prediction. A foundation model is pretrained on synthetic and real data, so it works on your data
-zero-shot: there is no model of your own to train, tune or maintain.
-
-The first model is **ChakraTS-OS-10M**, for time-series forecasting. Give it the past values of any series, such as daily
-sales, hourly electricity use or weekly sign-ups, and it predicts the next values with a range of likely outcomes around
-each one. It can also use what you already know about the future, like planned prices or a weather forecast, and it
-reads up to 32,768 past values of a series, nearly four years of hourly data, so long seasonal patterns are not cut off.
-It is a drop-in alternative to ARIMA, Prophet or a model you would train yourself, and with 10.6M parameters it runs on
-a laptop CPU in a fraction of a second.
-
-For its size it is a frontier model: the most accurate open forecasting model under 100M parameters on fev-bench, and
-more accurate than most open models up to 100 times its size (see [Results](https://github.com/yhatlabs/yhatmodels#results)).
+> Forecasting in production? Use ChakraTS, our most accurate model, through the
+> [YHat Labs API](https://github.com/yhatlabs/yhatlabs-python).
 
 ## Quick start
 
@@ -47,21 +39,20 @@ import numpy as np
 from yhatmodels import ChakraTS
 
 model = ChakraTS.from_pretrained("ChakraTS-OS-10M")
-
-history = 10 + np.sin(np.arange(500) / 24 * 2 * np.pi)  # any series: sales, demand, sensor readings, ...
+history = 10 + np.sin(np.arange(500) / 24 * 2 * np.pi)  # any series: sales, demand, sensor readings
 q = model.forecast(history, h=48)                         # the next 48 steps: quantiles 0.1, 0.5 and 0.9
 ```
 
-The first download asks you to accept the model license once, with a free yhatlabs.com account (see
-[License](https://github.com/yhatlabs/yhatmodels#license)). After that the model runs entirely on your computer.
+The first download asks you to accept the [model license](https://github.com/yhatlabs/yhatmodels#license) once, with a
+free yhatlabs.com account. After that the model runs entirely on your computer. Or start with the
+[getting-started notebook](https://colab.research.google.com/github/yhatlabs/yhatlabs-cookbook/blob/main/getting-started/chakrats-os-10m.ipynb)
+in Colab.
 
 ## What you can do
 
 ### Get a range, not just a number
 
-Every forecast comes with a range of likely values, so you can plan for a bad week as well as a typical one; the shaded
-bands in the picture at the top are 80% and 90% intervals. Ask for the intervals you need: an 80% interval should
-contain the actual value about 80% of the time, and `evaluate` (below) checks that on your own data.
+Ask for the intervals you need; an 80% interval should hold the actual value about 80% of the time.
 
 ```python
 q = model.forecast(history, h=48, level=[80, 95])  # (48, 5): the 95% and 80% interval edges around the median
@@ -69,8 +60,7 @@ q = model.forecast(history, h=48, level=[80, 95])  # (48, 5): the 95% and 80% in
 
 ### Use what you know about the future
 
-If you know something about the coming days, give it to the model: a weather forecast, planned prices, holidays. Name
-those columns as `known`, and put their future values in the rows after your last observation.
+Name the columns you know ahead as `known`, with their future values in the rows after your last observation.
 
 ```python
 # df: one row per hour with ds, y (solar output), sunlight and clouds;
@@ -84,14 +74,13 @@ fc = model.forecast(df, h=48, known=["sunlight", "clouds"])
     <img src="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/covariates_light.png" alt="Two days of solar output forecast from history alone and with sunlight and cloud cover" width="100%">
   </picture>
   <br>
-  <sub>Two days of solar output. From history alone, the model expects another sunny day; with sunlight and cloud cover
-  it sees the cloudy one coming. Data: <a href="https://www.kaggle.com/datasets/samanemami/renewable-energy-and-weather-conditions">Renewable Energy and Weather Conditions</a> (CC0).</sub>
+  <sub>From history alone, the model expects another sunny day; with sunlight and cloud cover it sees the cloudy one
+  coming. Data: <a href="https://www.kaggle.com/datasets/samanemami/renewable-energy-and-weather-conditions">Renewable Energy and Weather Conditions</a> (CC0).</sub>
 </p>
 
 ### Forecast your tables
 
-Most data lives in tables. Pass one row per series and timestamp, and you get a table back: one row per future step,
-with the quantiles or intervals you ask for.
+One row per series and timestamp in; one row per future step out, with the quantiles or intervals you ask for.
 
 ```python
 fc = model.forecast(df, h=7, known=["price", "promo"], level=[80, 95])
@@ -104,14 +93,13 @@ fc.head()  # unique_id, ds, q2.5, q10, median, q90, q97.5
     <img src="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/tables_light.png" alt="Four regions of the Texas grid forecast three days ahead in one call" width="100%">
   </picture>
   <br>
-  <sub>Four regions of the Texas grid, forecast three days ahead in one call, each with its 80% interval. Data:
-  <a href="https://www.ercot.com">ERCOT</a>.</sub>
+  <sub>Four regions of the Texas grid, forecast three days ahead in one call. Data: <a href="https://www.ercot.com">ERCOT</a>.</sub>
 </p>
 
 ### Check it on your own history
 
-Before you rely on a forecast, see how it would have done. `evaluate` goes back to a few points in each series' past,
-forecasts from there, and scores the forecasts against what really happened, next to a simple seasonal baseline.
+`evaluate` forecasts from a few points in each series' past and scores the forecasts against what happened, next to a
+seasonal baseline.
 
 ```python
 res = model.evaluate(df, h=7, windows=3)
@@ -126,15 +114,14 @@ res.plot_calibration() # do 10% of actual values fall below the 10% quantile, an
     <img src="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/backtest_light.png" alt="A backtest of four past days and its calibration plot" width="100%">
   </picture>
   <br>
-  <sub>Four past days of Gulf Coast demand, each forecast from the history before it. The third was a hot day the history
-  gave no sign of, and the forecast misses it; across all four regions, the quantiles stay close to calibrated.</sub>
+  <sub>Four past days of Gulf Coast demand, each forecast from the history before it, and the calibration across all four
+  regions.</sub>
 </p>
 
 ### Fine-tune on your data
 
-If your series follow patterns of their own, such as your promotions or paydays, `tune` adapts the model to your
-history in seconds to minutes on a CPU. The tuned model is kept only if it forecasts your held-out history better than
-the original.
+`tune` adapts the model to your own patterns (promotions, paydays) in seconds to minutes on a CPU, and keeps the tune only
+if it beats the original on your held-out history.
 
 ```python
 tuned = model.tune(df, h=7)
@@ -142,8 +129,6 @@ tuned.save("my-tuned/")
 ```
 
 ### From the command line
-
-Everything above also works on a CSV or Parquet file, straight from the terminal.
 
 ```bash
 yhatmodels forecast sales.csv --h 7 --known price,promo --level 80,95 -o forecast.csv
@@ -154,10 +139,8 @@ Every option is in the [usage guide](https://github.com/yhatlabs/yhatmodels/blob
 
 ## Results
 
-[fev-bench](https://huggingface.co/spaces/autogluon/fev-leaderboard) scores forecasting models on 100 tasks from many
-domains. Its skill score says how much more accurate a model is than a simple seasonal forecast; higher is better.
-ChakraTS-OS-10M is the most accurate open model under 100M parameters, and more accurate than most open models up to
-100 times its size.
+[fev-bench](https://huggingface.co/spaces/autogluon/fev-leaderboard) scores forecasting models on 100 tasks; the skill
+score says how much more accurate a model is than a simple seasonal forecast (higher is better).
 
 <p align="center">
   <picture>
@@ -165,9 +148,6 @@ ChakraTS-OS-10M is the most accurate open model under 100M parameters, and more 
     <img src="https://raw.githubusercontent.com/yhatlabs/yhatmodels/main/docs/assets/results_light.png" alt="fev-bench skill score against model size for open forecasting models" width="100%">
   </picture>
 </p>
-
-It handles covariates well: on the 42 tasks that come with them, it keeps its accuracy, while most models lose
-some:
 
 | Model | Parameters | All 100 tasks | 42 tasks with covariates |
 |---|---|---|---|
@@ -183,18 +163,19 @@ some:
 | TimeH2O-v1-tiny | 5.8M | 45.5 | 41.5 |
 | Toto-2.0-2.5B | 2.5B | 44.4 | 38.8 |
 
-<sub>fev-bench skill score (%), as of November 2026, computed the way the fev-bench leaderboard does from the result
-files in the [fev repository](https://github.com/autogluon/fev); sizes from the models' Hugging Face pages. The data
-behind the chart and table is in [docs/benchmarks.csv](https://github.com/yhatlabs/yhatmodels/blob/main/docs/benchmarks.csv).</sub>
+<sub>fev-bench skill score (%), November 2026, computed as the leaderboard does from the result files in the
+[fev repository](https://github.com/autogluon/fev); sizes from the models' Hugging Face pages
+([data](https://github.com/yhatlabs/yhatmodels/blob/main/docs/benchmarks.csv)). Our GIFT-Eval and TIME results, and
+notebooks that reproduce all three, are in the [cookbook](https://github.com/yhatlabs/yhatlabs-cookbook/tree/main/benchmarks).</sub>
 
-## Ways to use ChakraTS
+## Open model or API?
 
-| | `yhatmodels` (this library) | The YHat Labs API |
+| | yhatmodels (this library) | YHat Labs API |
 |---|---|---|
-| Model | ChakraTS-OS-10M, open weights | ChakraTS, our flagship model |
+| Model | ChakraTS-OS-10M, open weights | ChakraTS, our most accurate model |
 | Runs | on your computer | on our servers |
 | For | research, evaluation, personal projects, competitions | production and commercial use |
-| Start | `pip install yhatmodels` | `pip install yhatlabs`, or try it on [yhatlabs.com](https://yhatlabs.com) |
+| Start | `pip install yhatmodels` | `pip install yhatlabs`, with a key from [yhatlabs.com](https://yhatlabs.com/models/signup) |
 
 Both use the same argument names, so code moves from one to the other with few changes.
 
@@ -206,34 +187,32 @@ Both use the same argument names, so code moves from one to the other with few c
 
 ## License
 
-The `yhatmodels` code is [Apache-2.0](https://github.com/yhatlabs/yhatmodels/blob/main/LICENSE). The ChakraTS-OS-10M weights are under the
-[Chakra Non-Commercial Model License](https://yhatlabs.com/model-license): free for research, personal use, internal
-evaluation and data science competitions. For commercial use, use the [hosted API](https://yhatlabs.com) or write to
-[licensing@yhatlabs.com](mailto:licensing@yhatlabs.com).
+The `yhatmodels` code is [Apache-2.0](https://github.com/yhatlabs/yhatmodels/blob/main/LICENSE). The ChakraTS-OS-10M
+weights are under the [Chakra Non-Commercial Model License](https://yhatlabs.com/model-license): free for academic research,
+personal use, evaluation for up to 90 days and data science competitions. For commercial use, use the
+[YHat Labs API](https://github.com/yhatlabs/yhatlabs-python) or write to [licensing@yhatlabs.com](mailto:licensing@yhatlabs.com).
 
 The first download asks you to accept the license once, with a free yhatlabs.com account:
 
 - **On your computer:** your browser opens; sign in or create an account, accept, and the download starts.
 - **Over SSH:** the terminal shows a link; open it anywhere and paste back the token it shows.
-- **In CI or scripts:** set `YHAT_MODELS_TOKEN` (copy it from [yhatlabs.com/models/license](https://yhatlabs.com/models/license)),
-  or run `yhatmodels accept-license ChakraTS-OS-10M` once in a terminal.
+- **In CI or scripts:** set `YHAT_MODELS_TOKEN` (from [yhatlabs.com/models/license](https://yhatlabs.com/models/license)),
+  or run `yhatmodels accept-license ChakraTS-OS-10M` once.
 
 ## Questions
 
-**Does my data leave my computer?** No. The model runs locally. The only call to YHat Labs is the license check before
-the first download, which sends your token and nothing else.
+**Does my data leave my computer?** No. The only call to YHat Labs is the license check before the first download, which
+sends your token and nothing else.
 
-**Can I use it offline, or on a server?** Yes. Once downloaded, the weights stay in the Hugging Face cache and later runs
-need no network. On machines without a browser, set `YHAT_MODELS_TOKEN`.
+**Can I use it offline?** Yes. Once downloaded, the weights stay in the Hugging Face cache and later runs need no network.
 
-**Do I need a GPU?** No. It is fast on a CPU; an NVIDIA or Apple GPU helps with large batches and long histories.
+**Do I need a GPU?** No. An NVIDIA or Apple GPU helps with large batches and long histories.
 
-**What can't it do?** It returns quantiles rather than sample paths, has no per-series attributes (static covariates),
-and reads at most the last 32,768 steps of a history. The hosted ChakraTS adds sample paths and static covariates.
+**What can't it do?** It returns quantiles, not sample paths; it has no static covariates; it reads at most the last
+32,768 steps; and forecasts past 768 steps continue in blocks and lose accuracy. The hosted ChakraTS adds sample paths and
+static covariates.
 
 ## Citation
-
-If you use ChakraTS-OS in your work, please cite it:
 
 ```bibtex
 @misc{yhatlabs2026chakratsos,
@@ -245,6 +224,4 @@ If you use ChakraTS-OS in your work, please cite it:
 }
 ```
 
-## Contact
-
-[founders@yhatlabs.com](mailto:founders@yhatlabs.com) · [yhatlabs.com](https://yhatlabs.com)
+[yhatlabs.com](https://yhatlabs.com) · [founders@yhatlabs.com](mailto:founders@yhatlabs.com)
