@@ -90,12 +90,14 @@ def _in_notebook() -> bool:
     return type(shell).__name__ == "ZMQInteractiveShell"
 
 
-def _callback_server(state: str, done_url: str) -> tuple[http.server.HTTPServer, threading.Event, list[str]]:
+def _callback_server(state: str, done_url: str) -> tuple[http.server.ThreadingHTTPServer, threading.Event, list[str]]:
     """A one-off server on 127.0.0.1 that takes the token the license page sends back. `state` ties the answer to this
     request, so another page cannot plant a token."""
     got, event = [], threading.Event()
 
     class Handler(http.server.BaseHTTPRequestHandler):
+        timeout = 10
+
         def do_GET(self) -> None:
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             ok = q.get("state", [""])[0] == state and bool(q.get("token", [""])[0].strip())
@@ -114,7 +116,7 @@ def _callback_server(state: str, done_url: str) -> tuple[http.server.HTTPServer,
         def log_message(self, *args: object) -> None:
             pass
 
-    server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.2}, daemon=True).start()
     return server, event, got
 

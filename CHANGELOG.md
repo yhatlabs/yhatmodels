@@ -3,6 +3,9 @@
 ## 0.1.1 (unreleased)
 
 - README: every link and picture is a full URL, so the PyPI page works like the GitHub one (a test checks it).
+- License acceptance no longer stalls after the page says All set: with Chrome, the terminal (or notebook) sat a minute or
+  more before "License accepted". The local server that receives the token now serves each connection on its own thread,
+  so the idle spare connection Chrome opens next to it holds nothing up.
 
 ## 0.1.0 (2026-11-20)
 
