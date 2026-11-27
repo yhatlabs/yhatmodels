@@ -11,6 +11,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from yhatmodels.catalog import lookup
@@ -49,15 +52,34 @@ def resolve(model: str | Path, revision: str | None = None, token: str | None = 
     if entry:
         ensure_accepted(repo, entry["license"])  # known without a network call
     try:
-        head = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[CONFIG]))
+        with _without_token_hint():
+            head = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[CONFIG]))
     except (RepositoryNotFoundError, HFValidationError):
         raise ModelLoadError(f"{name} is not a model yhatmodels can find (no such repository, or a private one). {what}") from None
     config = read_config(head)
     if not entry:  # another repository: its config.json names the license
         ensure_accepted(repo, config.get("license"))
-    folder = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[*DOWNLOAD, *config.get("files", [])]))
+    with _without_token_hint():
+        folder = Path(snapshot_download(repo, revision=revision, token=token, allow_patterns=[*DOWNLOAD, *config.get("files", [])]))
     _check_files(folder)
     return folder
+
+
+class _NoTokenHint(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "unauthenticated requests" not in record.getMessage()
+
+
+@contextmanager
+def _without_token_hint() -> Iterator[None]:
+    """The Hub tells downloads without a Hugging Face token to set HF_TOKEN. Released models need no Hugging Face account,
+    so that line only reads like an error; other Hub warnings still show."""
+    log, hint = logging.getLogger("huggingface_hub.utils._http"), _NoTokenHint()
+    log.addFilter(hint)
+    try:
+        yield
+    finally:
+        log.removeFilter(hint)
 
 
 def _cached(repo: str, revision: str | None) -> Path | None:

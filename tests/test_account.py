@@ -183,6 +183,30 @@ def test_an_idle_browser_connection_holds_nothing_up(spare_first):
         server.server_close()
 
 
+def test_code_pasted_with_the_download_is_not_taken_for_a_token(api, hub, monkeypatch, capsys):
+    class Terminal(io.StringIO):
+        def isatty(self):
+            return True
+
+    # the README's quick start pasted whole into a Python prompt: the lines after from_pretrained wait in the terminal
+    pasted = Terminal("history = 10 + np.sin(np.arange(500))\nfc = model.forecast(history, h=48)\n")
+    monkeypatch.setattr(account.sys, "stdin", pasted)
+    monkeypatch.setattr(account, "_has_display", lambda: True)
+
+    def browser(url):
+        q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+        assert _get(f"{q['callback'][0]}?token=yhm_good&state={q['state'][0]}")[0] == 302
+        return True
+
+    monkeypatch.setattr(account.webbrowser, "open", browser)
+    assert ChakraTS.from_pretrained("ChakraTS-OS-10M", device="cpu")
+    assert account.stored_token() == ("yhm_good", "file")
+    assert pasted.read().startswith("history = ")  # still there for the prompt to run next
+    out = capsys.readouterr().out
+    assert "If your browser is on another computer" in out
+    assert "\n  https://site.test/models/license?license=chakra-nc-1.0&model=ChakraTS-OS-10M\n" in out  # no hand-off
+
+
 def test_without_a_display_the_token_is_pasted(api, hub, monkeypatch, capsys):
     class Terminal(io.StringIO):
         def isatty(self):

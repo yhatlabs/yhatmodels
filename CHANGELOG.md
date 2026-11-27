@@ -1,8 +1,14 @@
 # Changelog
 
-## 0.1.1 (unreleased)
+## 0.1.1
 
-- README: every link and picture is a full URL, so the PyPI page works like the GitHub one (a test checks it).
+- README: every link and picture is a full URL, so the PyPI page works like the GitHub one (a test checks it). The quick
+  start loads the model and forecasts in two steps.
+- The first download no longer reads the terminal while the browser has the license page: code pasted along with it
+  (the quick start pasted whole into a Python prompt) runs after the download instead of being taken for a token.
+- While it waits for the browser, the first download says so, and prints a second link for a browser on another computer
+  (a remote notebook or a dev container): that page shows the token to set as `YHAT_MODELS_TOKEN`.
+- The Hub's "set a HF_TOKEN" warning no longer shows during downloads: released models need no Hugging Face account.
 - License acceptance no longer stalls after the page says All set: with Chrome, the terminal (or notebook) sat a minute or
   more before "License accepted". The local server that receives the token now serves each connection on its own thread,
   so the idle spare connection Chrome opens next to it holds nothing up.
