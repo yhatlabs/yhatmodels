@@ -141,3 +141,16 @@ def test_info_describes_the_model_for_a_model_list(tiny_model_dir, tmp_path):
     info = ChakraTS.from_pretrained(d, device="cpu").info
     assert info["task"] == "forecasting" and info["parameters"] > 0 and info["multivariate"] is True
     assert info["patch_sizes"] == [2, 4, 8] and info["default_preset"] == "fast" and info["presets"] == ["fast", "pro"]
+
+
+def test_the_hubs_set_a_token_hint_is_hidden_during_downloads(caplog):
+    import logging
+
+    from yhatmodels.hub import _without_token_hint
+
+    log = logging.getLogger("huggingface_hub.utils._http")
+    with caplog.at_level(logging.WARNING, logger="huggingface_hub.utils._http"), _without_token_hint():
+        log.warning("You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits.")
+        log.warning("another Hub warning")
+    log.warning("unauthenticated requests, after the download")
+    assert [r.getMessage() for r in caplog.records] == ["another Hub warning", "unauthenticated requests, after the download"]

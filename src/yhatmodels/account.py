@@ -3,8 +3,8 @@
 
 Before the first download of such a model, yhatmodels checks with the YHat Labs API that the person behind a token has
 accepted the model's license. With no token, or one whose account has not accepted it yet, it opens yhatlabs.com in the
-browser (sign in or create an account, accept the license) and receives the token back on a one-off local address; the
-token can also be pasted. It is then kept in ~/.cache/yhatmodels/token. Weights already downloaded are never checked, so
+browser (sign in or create an account, accept the license) and receives the token back on a one-off local address; with
+no browser on this computer, the token is pasted. It is then kept in ~/.cache/yhatmodels/token. Weights already downloaded are never checked, so
 they work offline.
 
 The token (`yhm_...`) only proves the acceptance: it cannot call the paid API. An API key works in its place.
@@ -121,30 +121,6 @@ def _callback_server(state: str, done_url: str) -> tuple[http.server.ThreadingHT
     return server, event, got
 
 
-def _wait(event: threading.Event, got: list[str], paste: bool) -> str | None:
-    """The browser's answer, or a token pasted in the terminal, whichever comes first."""
-    if not paste or sys.platform == "win32":  # select() on stdin is Unix-only
-        return got[0] if event.wait(WAIT_S) else None
-    import select
-    import time
-
-    print("Or paste your token here and press Enter: ", end="", flush=True)
-    end = time.monotonic() + WAIT_S
-    while not event.is_set():
-        if time.monotonic() > end:
-            print()
-            return None
-        ready, _, _ = select.select([sys.stdin], [], [], 0.25)
-        if ready:
-            line = sys.stdin.readline()
-            if not line:
-                return None
-            if line.strip():
-                return line.strip()
-    print()
-    return got[0]
-
-
 def obtain_token(license_id: str, model: str, intro: str) -> str | None:
     """A token from the browser or the terminal; None where neither is possible (CI, scripts, no browser allowed)."""
     tty, notebook = sys.stdin.isatty(), _in_notebook()
@@ -163,10 +139,15 @@ def obtain_token(license_id: str, model: str, intro: str) -> str | None:
     state = secrets.token_urlsafe(16)
     server, event, got = _callback_server(state, license_page(license_id, model, done="1"))
     url = license_page(license_id, model, callback=f"http://127.0.0.1:{server.server_address[1]}/", state=state)
+    # The terminal isn't read while the browser has the page: code pasted with the download (a quick start pasted whole)
+    # stays queued and runs after it, instead of being taken for a token.
     try:
-        print(f"{intro}\nOpening yhatlabs.com in your browser (sign in or create an account, then accept):\n\n  {url}\n")
+        print(f"{intro}\nOpening yhatlabs.com in your browser (sign in or create an account, then accept):\n\n  {url}\n\n"
+              f"Waiting for the browser (up to {WAIT_S // 60} minutes). If your browser is on another computer, open this "
+              f"link there instead, then set YHAT_MODELS_TOKEN to the token it shows:\n\n  {license_page(license_id, model)}\n",
+              flush=True)  # fmt: skip
         webbrowser.open(url)
-        return _wait(event, got, paste=tty)
+        return got[0] if event.wait(WAIT_S) else None
     except KeyboardInterrupt:
         return None
     finally:

@@ -34,17 +34,25 @@ fev-bench (see [Results](https://github.com/yhatlabs/yhatmodels#results)).
 pip install yhatmodels
 ```
 
+Load the model. The first time, your browser opens to accept the [model license](https://github.com/yhatlabs/yhatmodels#license)
+once, with a free yhatlabs.com account, and the model (42 MB) downloads:
+
 ```python
-import numpy as np
 from yhatmodels import ChakraTS
 
 model = ChakraTS.from_pretrained("ChakraTS-OS-10M")
+```
+
+Then forecast any series:
+
+```python
+import numpy as np
+
 history = 10 + np.sin(np.arange(500) / 24 * 2 * np.pi)  # any series: sales, demand, sensor readings
 q = model.forecast(history, h=48)                         # the next 48 steps: quantiles 0.1, 0.5 and 0.9
 ```
 
-The first download asks you to accept the [model license](https://github.com/yhatlabs/yhatmodels#license) once, with a
-free yhatlabs.com account. After that the model runs entirely on your computer. Or start with the
+After that the model runs entirely on your computer. Or start with the
 [getting-started notebook](https://colab.research.google.com/github/yhatlabs/yhatlabs-cookbook/blob/main/getting-started/chakrats-os-10m.ipynb)
 in Colab.
 
@@ -196,6 +204,8 @@ The first download asks you to accept the license once, with a free yhatlabs.com
 
 - **On your computer:** your browser opens; sign in or create an account, accept, and the download starts.
 - **Over SSH:** the terminal shows a link; open it anywhere and paste back the token it shows.
+- **In a notebook on another machine** (a remote Jupyter server, a dev container): open the second link it prints on
+  your own computer, then set `YHAT_MODELS_TOKEN` to the token the page shows.
 - **In CI or scripts:** set `YHAT_MODELS_TOKEN` (from [yhatlabs.com/models/license](https://yhatlabs.com/models/license)),
   or run `yhatmodels accept-license ChakraTS-OS-10M` once.
 

@@ -5,7 +5,7 @@ Each task lives in its own subpackage (yhatmodels.ts: time-series forecasting) a
 `import yhatmodels` stays light as tasks are added.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from yhatmodels.catalog import list_models
 from yhatmodels.licensing import accept_license
