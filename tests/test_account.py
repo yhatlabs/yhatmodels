@@ -1,6 +1,7 @@
 import http.client
 import io
 import json
+import socket
 import threading
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -147,6 +148,39 @@ def test_the_browser_hands_the_token_back(api, hub, monkeypatch):
     assert answers[1][0] == 302 and answers[1][1].endswith("model=ChakraTS-OS-10M&done=1")
     assert account.token_file().read_text().strip() == "yhm_good"
     assert account.stored_token() == ("yhm_good", "file")
+
+
+@pytest.mark.parametrize("spare_first", [False, True], ids=["spare-after-token", "spare-before-token"])
+def test_an_idle_browser_connection_holds_nothing_up(spare_first):
+    server, event, got = account._callback_server("s1", "https://site.test/models/license?done=1")
+    port = server.server_address[1]
+    picked_up = threading.Semaphore(0)
+    accept = server.get_request
+
+    def accept_and_count():
+        conn = accept()
+        picked_up.release()
+        return conn
+
+    server.get_request = accept_and_count
+    idle = []
+    try:
+        if spare_first:
+            idle.append(socket.create_connection(("127.0.0.1", port)))
+        assert _get(f"http://127.0.0.1:{port}/?token=yhm_good&state=s1")[0] == 302
+        if not spare_first:
+            idle.append(socket.create_connection(("127.0.0.1", port)))
+        assert picked_up.acquire(timeout=5) and picked_up.acquire(timeout=5)
+        stopping = threading.Thread(target=server.shutdown, daemon=True)
+        stopping.start()
+        stopping.join(5)
+        assert not stopping.is_alive(), "stopping the server waits on the idle connection"
+        assert event.is_set() and got == ["yhm_good"]
+    finally:
+        for s in idle:
+            s.close()
+        server.shutdown()
+        server.server_close()
 
 
 def test_without_a_display_the_token_is_pasted(api, hub, monkeypatch, capsys):
